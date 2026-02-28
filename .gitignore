@@ -1,10 +1,15 @@
-.env
+
 
 # node modules
 node_modules/
 
 .vscode/
 
+/server/.env
+/server/package-lock.json
+/server/package.json
+/server/node_modules/
 
 /client/node_modules/
-/server/node_modules/
+/client/package-lock.json
+/client/package.json
