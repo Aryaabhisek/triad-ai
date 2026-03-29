@@ -1,15 +1,8 @@
 
-
-# node modules
 node_modules/
+package-lock.json
 
 .vscode/
-
-/server/.env
-/server/package-lock.json
-/server/package.json
-/server/node_modules/
-
-/client/node_modules/
-/client/package-lock.json
-/client/package.json
+.env
+.env.local
+.env.*.local
