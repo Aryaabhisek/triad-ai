@@ -7,5 +7,8 @@
   "scripts": {
     "build": "cd client && npm install && npm run build && cd ../server && npm install",
     "start": "cd server && npm start"
+  },
+  "dependencies": {
+    "node": "^25.8.2"
   }
 }
