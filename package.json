@@ -2,13 +2,13 @@
   "name": "triad-ai",
   "version": "1.0.0",
   "engines": {
-    "node": ">=20.0.0"
+    "node": "22.13.1"
   },
   "scripts": {
     "build": "cd client && npm install && npm run dev && cd ../server && npm install",
     "start": "cd server && npm start"
   },
   "dependencies": {
-    "node": "^25.8.2"
+    "node": "23.13.1"
   }
 }

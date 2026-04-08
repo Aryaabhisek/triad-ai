@@ -71,7 +71,10 @@ export default function Home() {
 
   return (
     <div style={{ maxWidth: 1300, margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ textAlign: 'center', fontSize: 32 }}>🔺 Triad AI</h1>
+      <h1 style={{ textAlign: 'center', fontSize: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+        <img src="/Triad_AI_Logo_SVG.svg" alt="Triad AI Logo" style={{ height: '40px', width: '40px' }} />
+        Triad AI
+      </h1>
       <p style={{ textAlign: 'center', color: '#888' }}>One question. Three AI perspectives. In real-time.</p>
 
       {/* Input */}

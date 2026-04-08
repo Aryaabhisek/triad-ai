@@ -33,7 +33,7 @@ export default function Login() {
 
         {/* Header */}
         <div className="text-center space-y-1">
-          <div className="text-4xl mb-2">🔺</div>
+          <img src="/Triad_AI_Logo_SVG.svg" alt="Triad AI Logo" className="h-25 w-130 rounded-[5px]"/>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome back</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">Sign in to your Triad AI account</p>
         </div>

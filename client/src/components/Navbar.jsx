@@ -48,7 +48,7 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 font-bold text-xl text-gray-900 dark:text-white">
-          <span className="text-2xl">🔺</span>
+          <img src="/Triad_AI_Logo_SVG.svg" alt="Triad AI Logo" className="h-8 w-8" />
           <span>Triad <span className="text-primary">AI</span></span>
         </Link>
 
