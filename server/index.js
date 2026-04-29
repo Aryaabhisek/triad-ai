@@ -5,6 +5,12 @@ require('dotenv').config();
 
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL || 'http://localhost:5173'
+];
+
 app.use(cors({ 
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -30,9 +36,3 @@ mongoose.connect(process.env.MONGO_URI)
     );
   })
   .catch(err => console.error('MongoDB error:', err));
-
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  process.env.CLIENT_URL || 'http://localhost:5173'
-];
