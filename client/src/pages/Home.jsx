@@ -38,7 +38,8 @@ export default function Home() {
     MODELS.forEach(m => updateModel(m.key, { loading: true }));
 
     // Open SSE connection — token passed as query param for EventSource
-    const url = `http://localhost:5000/api/query/stream?query=${encodeURIComponent(query)}&token=${token}`;
+    const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    const url = `${BASE_URL}/api/query/stream?query=${encodeURIComponent(query)}&token=${token}`;
     const es  = new EventSource(url);
 
     es.onmessage = (e) => {
