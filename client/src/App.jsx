@@ -6,6 +6,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import History from './pages/History';
 
+
+
+
 const PrivateRoute = ({ children }) => {
   const { token } = useAuth();
   return token ? children : <Navigate to="/login" />;

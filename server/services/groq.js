@@ -1,6 +1,10 @@
 const axios = require('axios');
 
 async function* streamGroq(prompt) {
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error('GROQ_API_KEY not configured');
+  }
+
   const res = await axios.post(
     'https://api.groq.com/openai/v1/chat/completions',
     {
@@ -10,7 +14,8 @@ async function* streamGroq(prompt) {
     },
     {
       headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
-      responseType: 'stream'
+      responseType: 'stream',
+      timeout: 30000
     }
   );
 

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ResponsePanel from '../components/ResponsePanel';
+import SummaryCard from '../components/SummaryCard'; // 👈 NEW IMPORT
 
 const MODELS = [
   { key: 'gemini',  label: 'Gemini 1.5 Flash', color: '#4285F4' },
@@ -20,6 +21,11 @@ export default function Home() {
   const [responses, setResponses] = useState(initialState());
   const [asked,     setAsked]     = useState(false);
 
+  // 👇 NEW: summary state
+  const [summary,       setSummary]       = useState('');
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summaryError,  setSummaryError]  = useState(null);
+
   const updateModel = (model, updates) => {
     setResponses(prev => ({
       ...prev,
@@ -27,23 +33,32 @@ export default function Home() {
     }));
   };
 
+  // 👇 NEW: track how many models have finished
+  const finishedModels = useRef({});
+
   const handleAsk = () => {
     if (!query.trim()) return;
 
     // Reset state
     setResponses(initialState());
     setAsked(true);
+    setSummary('');           // 👈 reset summary on new question
+    setSummaryError(null);    // 👈 reset summary error
+    setIsSummarizing(false);
+    finishedModels.current = {}; // 👈 reset tracker
 
     // Set all to loading
     MODELS.forEach(m => updateModel(m.key, { loading: true }));
 
-    // Open SSE connection — token passed as query param for EventSource
     const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
     const url = `${BASE_URL}/api/query/stream?query=${encodeURIComponent(query)}&token=${token}`;
     const es  = new EventSource(url);
 
     es.onmessage = (e) => {
-      if (e.data === '[ALL_DONE]') { es.close(); return; }
+      if (e.data === '[ALL_DONE]') {
+        es.close();
+        return;
+      }
 
       const { model, type, payload } = JSON.parse(e.data);
 
@@ -58,10 +73,30 @@ export default function Home() {
       }
       if (type === 'done') {
         updateModel(model, { loading: false, latency: payload.latency });
+
+        // 👇 NEW: mark this model as done and store its final text
+        finishedModels.current[model] = true;
+
+        // 👇 NEW: if all 3 are done, trigger summarizer
+        if (Object.keys(finishedModels.current).length === MODELS.length) {
+          setResponses(prev => {
+            triggerSummary(query, prev); // pass final snapshot
+            return prev;
+          });
+        }
       }
       if (type === 'error') {
         updateModel(model, { loading: false, error: payload });
-      }
+        finishedModels.current[model] = true;
+
+      // Trigger summary even if one model fails
+      if (Object.keys(finishedModels.current).length === MODELS.length) {
+        setResponses(prev => {
+        triggerSummary(query, prev);
+      return prev;
+    });
+  }
+}
     };
 
     es.onerror = () => {
@@ -69,6 +104,46 @@ export default function Home() {
       es.close();
     };
   };
+
+  // 👇 NEW: summary fetcher function
+  const triggerSummary = async (originalPrompt, finalResponses) => {
+    setIsSummarizing(true);
+    setSummaryError(null);
+    const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    try {
+      const res = await fetch(`${BASE_URL}/api/query/summarize`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          originalPrompt,
+          gemini:  finalResponses.gemini.text,
+          mistral: finalResponses.mistral.text,
+          groq:    finalResponses.groq.text,
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.error('Summary API error:', data);
+        setSummaryError(data.error || 'Unknown error');
+        setSummary('');
+      } else {
+        setSummary(data.summary || '');
+        setSummaryError(null);
+      }
+    } catch (err) {
+      console.error('Summary fetch failed:', err);
+      setSummaryError(err.message || 'Network error');
+      setSummary('');
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+
+  
 
   return (
     <div style={{ maxWidth: 1300, margin: '0 auto', padding: '20px' }}>
@@ -106,6 +181,11 @@ export default function Home() {
             />
           ))}
         </div>
+      )}
+
+      {/* 👇 NEW: Summary card — shows below the 3 panels */}
+      {asked && (
+        <SummaryCard summary={summary} isLoading={isSummarizing} error={summaryError} />
       )}
     </div>
   );

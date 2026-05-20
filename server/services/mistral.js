@@ -1,6 +1,10 @@
 const axios = require('axios');
 
 async function* streamMistral(prompt) {
+  if (!process.env.MISTRAL_API_KEY) {
+    throw new Error('MISTRAL_API_KEY not configured');
+  }
+
   const res = await axios.post(
     'https://api.mistral.ai/v1/chat/completions',
     {
@@ -10,7 +14,8 @@ async function* streamMistral(prompt) {
     },
     {
       headers: { Authorization: `Bearer ${process.env.MISTRAL_API_KEY}` },
-      responseType: 'stream'
+      responseType: 'stream',
+      timeout: 30000
     }
   );
 
